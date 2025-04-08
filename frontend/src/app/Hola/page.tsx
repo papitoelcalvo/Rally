@@ -1,10 +1,9 @@
-import { NextPage } from 'next'
-import { useState } from 'react';
+import { NextPage } from "next";
 
 interface Props {}
 
 const Page: NextPage<Props> = ({}) => {
-  return <div>hola</div>
-}
+  return <div>hola</div>;
+};
 
-export default Page
+export default Page;
