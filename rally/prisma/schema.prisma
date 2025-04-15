@@ -5,95 +5,104 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
-model usuario {
-  Id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password      String
-  username      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  role          Int
-  roles         Roles     @relation(fields: [role], references: [Id], name: "UserRoles")
+
+enum state {
+    active
+    inactive
+}
+
+model users {
+    Id        Int      @id @default(autoincrement())
+    email     String   @unique
+    password  String
+    username  String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    role      Int
+    roles     Roles    @relation(fields: [role], references: [Id], name: "UserRoles")
 }
 
 model Roles {
-  Id    Int     @id @default(autoincrement())
-  name  String  @unique
-  users usuario[]  @relation(name: "UserRoles")
+    Id          Int      @id @default(autoincrement())
+    name        String   @unique
+    descripcion String?
+    state       state?   @default(active)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @default(now()) @updatedAt
+    users       users[]  @relation(name: "UserRoles")
 }
 
 // Modelo para Grados
 model Grado {
-  id          Int        @id @default(autoincrement())
-  grado_nombre String    @unique
-  estudiantes  Estudiante[]
+    id           Int          @id @default(autoincrement())
+    grado_nombre String       @unique
+    estudiantes  Estudiante[]
 }
 
 // Modelo para Secciones
 model Seccion {
-  id            Int         @id @default(autoincrement())
-  seccion_nombre String     @unique
-  estudiantes   Estudiante[]
+    id             Int          @id @default(autoincrement())
+    seccion_nombre String       @unique
+    estudiantes    Estudiante[]
 }
 
 // Modelo para Grupos
 model Grupo {
-  id          Int          @id @default(autoincrement())
-  nombre      String
-  estudiantes Estudiante[]
-  movimientos MovimientoEstacion[]
+    id          Int                  @id @default(autoincrement())
+    nombre      String
+    estudiantes Estudiante[]
+    movimientos MovimientoEstacion[]
 }
 
 // Modelo para Estudiantes
 model Estudiante {
-  id          Int       @id @default(autoincrement())
-  nombre      String
-  numero_lista Int
-  grado_id    Int
-  seccion_id  Int
-  grupo_id    Int
-  grado       Grado     @relation(fields: [grado_id], references: [id])
-  seccion     Seccion   @relation(fields: [seccion_id], references: [id])
-  grupo       Grupo     @relation(fields: [grupo_id], references: [id])
+    id           Int     @id @default(autoincrement())
+    nombre       String
+    numero_lista Int
+    grado_id     Int
+    seccion_id   Int
+    grupo_id     Int
+    grado        Grado   @relation(fields: [grado_id], references: [id])
+    seccion      Seccion @relation(fields: [seccion_id], references: [id])
+    grupo        Grupo   @relation(fields: [grupo_id], references: [id])
 
-  @@unique([grado_id, seccion_id, numero_lista])
+    @@unique([grado_id, seccion_id, numero_lista])
 }
 
 // Modelo para Maestros
 model Maestro {
-  id        Int        @id @default(autoincrement())
-  nombre    String
-  estaciones Estacion[]
+    id         Int        @id @default(autoincrement())
+    nombre     String
+    estaciones Estacion[]
 }
 
 // Modelo para Estaciones
 model Estacion {
-  id           Int         @id @default(autoincrement())
-  nombre       String
-  maestro_id   Int
-  maestro      Maestro     @relation(fields: [maestro_id], references: [id])
-  movimientos_origen   MovimientoEstacion[] @relation("EstacionOrigen")
-  movimientos_destino  MovimientoEstacion[] @relation("EstacionDestino")
+    id                  Int                  @id @default(autoincrement())
+    nombre              String
+    maestro_id          Int
+    maestro             Maestro              @relation(fields: [maestro_id], references: [id])
+    movimientos_origen  MovimientoEstacion[] @relation("EstacionOrigen")
+    movimientos_destino MovimientoEstacion[] @relation("EstacionDestino")
 }
-
 
 // Modelo para Movimientos entre Estaciones
 model MovimientoEstacion {
-  id                Int         @id @default(autoincrement())
-  grupo_id          Int
-  estacion_origen_id Int
-  estacion_destino_id Int
-  hora_salida       DateTime
-  hora_llegada      DateTime?
-  tiempo_recorrido  Int? // Representa el tiempo en segundos
-  grupo             Grupo       @relation(fields: [grupo_id], references: [id])
-  estacion_origen   Estacion    @relation("EstacionOrigen", fields: [estacion_origen_id], references: [id])
-  estacion_destino  Estacion    @relation("EstacionDestino", fields: [estacion_destino_id], references: [id])
+    id                  Int       @id @default(autoincrement())
+    grupo_id            Int
+    estacion_origen_id  Int
+    estacion_destino_id Int
+    hora_salida         DateTime
+    hora_llegada        DateTime?
+    tiempo_recorrido    Int? // Representa el tiempo en segundos
+    grupo               Grupo     @relation(fields: [grupo_id], references: [id])
+    estacion_origen     Estacion  @relation("EstacionOrigen", fields: [estacion_origen_id], references: [id])
+    estacion_destino    Estacion  @relation("EstacionDestino", fields: [estacion_destino_id], references: [id])
 }
